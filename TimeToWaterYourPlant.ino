@@ -1,51 +1,66 @@
-int HUMID_SOIL_GREEN_LED = 13;
-int DRY_SOIL_YELLOW_LED = 12;
-int WATER_ERROR_SOIL_RED_LED = 11;
+const int WATER_ERROR_SOIL_RED_LED = 11;
+const int DRY_SOIL_YELLOW_LED = 12;
+const int HUMID_SOIL_GREEN_LED = 13;
 
-int COMMON_DELAY_MILLIS = 1000;
+const char SENSOR_PIN = A0; // A0 is analog
+
+const int COMMON_DELAY_MILLIS = 1000;
 
 void setup() {
+  
   // Setup LEDs
-  pinMode(HUMID_SOIL_GREEN_LED, OUTPUT);
-  pinMode(DRY_SOIL_YELLOW_LED, OUTPUT);
-  pinMode(WATER_ERROR_SOIL_RED_LED, OUTPUT);
+  setupLEDs();
 
-  // Read Analog input from A0 port
+  // Reading input from A0.
   Serial.begin(9600);
-  pinMode(A0, INPUT);
+  pinMode(SENSOR_PIN, INPUT);
+  
 }
 
 void loop() {
-  int SensorValue = analogRead(A0); //take a sample
-  Serial.print("Sensor value is: "); Serial.print(SensorValue);
-  Serial.println(""); 
   
+  int sensorValue = analogRead(SENSOR_PIN);
+  Serial.print("Sensor reading is: "); Serial.println(sensorValue);
+
   turnOffAllLEDs();
-  
   delay(COMMON_DELAY_MILLIS);
-  if (SensorValue >= 1000) {
-    digitalWrite(WATER_ERROR_SOIL_RED_LED, HIGH);
+
+  if (sensorValue >= 1000) {
+    turnOnLED(WATER_ERROR_SOIL_RED_LED);
     Serial.println("Sensor is not in the Soil or DISCONNECTED");
   }
-  if (SensorValue < 1000 && SensorValue >= 600) {
-    digitalWrite(DRY_SOIL_YELLOW_LED, HIGH);
-    Serial.println("Soil is DRY");
+
+  if (sensorValue < 1000 && sensorValue >= 600) {
+    turnOnLED(DRY_SOIL_YELLOW_LED);
+    Serial.println("Soil is dry");
   }
-  if (SensorValue < 600 && SensorValue >= 370) {
-    digitalWrite(HUMID_SOIL_GREEN_LED, HIGH);
-    Serial.println("Soil is HUMID");
+
+  if (sensorValue < 600 && sensorValue >= 370) {
+    turnOnLED(HUMID_SOIL_GREEN_LED);
+    Serial.println("Soil is humid");
   }
-  if (SensorValue < 370) {
-    digitalWrite(WATER_ERROR_SOIL_RED_LED, HIGH);
-    Serial.println("Sensor in WATER");
+
+  if (sensorValue < 370) {
+    turnOnLED(WATER_ERROR_SOIL_RED_LED);
+    Serial.println("Sensor in water");
   }
-  
+
   delay(COMMON_DELAY_MILLIS);
-  
+
+}
+
+void setupLEDs() {
+  pinMode(HUMID_SOIL_GREEN_LED, OUTPUT);
+  pinMode(DRY_SOIL_YELLOW_LED, OUTPUT);
+  pinMode(WATER_ERROR_SOIL_RED_LED, OUTPUT);
+}
+
+void turnOnLED(int led) {
+  digitalWrite(led, HIGH);
 }
 
 void turnOffAllLEDs() {
   digitalWrite(HUMID_SOIL_GREEN_LED, LOW);
   digitalWrite(DRY_SOIL_YELLOW_LED, LOW);
   digitalWrite(WATER_ERROR_SOIL_RED_LED, LOW);
-  }
+}
